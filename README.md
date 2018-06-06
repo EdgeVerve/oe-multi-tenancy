@@ -1,6 +1,6 @@
-# oe-cache module
+# oe-multi-tenancy module
 
-This module can be used to cache model data into memory database. Memory database internally uses memory connector.
+This module is responsible for data separation in multi-tenant environment.
 
 
 ## Dependency
