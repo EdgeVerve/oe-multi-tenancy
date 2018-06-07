@@ -1,5 +1,10 @@
 var oecloud = require('oe-cloud');
 var loopback = require('loopback');
+oecloud.observe('loaded', function(ctx, next){
+oecloud.attachMixinsToBaseEntity("MultiTenancyMixin");
+  return next();
+})
+
 oecloud.boot(__dirname, function (err) {
     if (err) {
         console.log(err);
@@ -20,7 +25,7 @@ var CacheTest;
 var app = oecloud;
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
-
+var Customer;
 var api = defaults(supertest(app));
 var basePath = app.get('restApiRoot');
 var url = basePath + '/CacheTests';
@@ -28,6 +33,7 @@ describe(chalk.blue('Cache Test Started'), function (done) {
     this.timeout(10000);
     before('wait for boot scripts to complete', function (done) {
         app.on('test-start', function () {
+           Customer=loopback.findModel("Customer");
             return done();
         });
     });
@@ -36,7 +42,9 @@ describe(chalk.blue('Cache Test Started'), function (done) {
       done();
     });
     it('t1 write your test case here.', function (done) {
-	  return done();
+    	Customer.find({}, {}, function(){
+         return done();
+        });
     });
 
 

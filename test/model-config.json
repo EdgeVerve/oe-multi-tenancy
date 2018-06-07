@@ -11,6 +11,7 @@
       "loopback/common/mixins",
       "loopback/server/mixins",
       "./common/mixins",
+      "../common/mixins",
       "./mixins"
     ]
   },
