@@ -110,7 +110,8 @@ function beforeSave(ctx, next) {
       return next();
     }
   } else {
-    autoScope.forEach((key) => {
+    for (var i = 0; i < autoScope.length; ++i) {
+      var key = autoScope[i];
       if (currentAutoScope) {
         const f1 = context[key] || '';
         const f2 = currentAutoScope[key] || '';
@@ -137,7 +138,7 @@ function beforeSave(ctx, next) {
         err1.retriable = false;
         return next(err1);
       }
-    });
+    }
   }
   data._autoScope = _autoScope;
   return next();
