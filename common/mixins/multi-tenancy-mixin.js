@@ -1,5 +1,4 @@
-﻿const loopback = require('loopback');
-const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
+﻿const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
 const toRegExp = require('loopback-datasource-juggler/lib/utils').toRegExp;
 const _ = require('lodash');
 const log = require('oe-logger')('multi-tenancy-mixin');
@@ -68,7 +67,7 @@ function convertToLowerCase(input) {
     });
     return resObj;
   }
-};
+}
 
 
 function beforeSave(ctx, next) {
@@ -90,7 +89,7 @@ function beforeSave(ctx, next) {
   const data = ctx.data || ctx.instance;
   const _autoScope = {};
   const autoScope = modelSettings.autoscope || modelSettings.autoScope;
-  if (!autoScope || autoScope.length == 0) {
+  if (!autoScope || autoScope.length === 0) {
     return next();
   }
 
@@ -101,7 +100,7 @@ function beforeSave(ctx, next) {
 
   // get default autoscope value from config files
   const defaultValue = ctx.Model.app.get('defaultAutoScope') || 'default';
-  
+
   if (callContext.ignoreAutoScope) {
     if (!callContext.useScopeAsIs) {
       autoScope.forEach((key) => {
@@ -151,9 +150,8 @@ function afterAccess(ctx, next) {
   if (modelSettings.mixins.MultiTenancyMixin === false) {
     return next();
   }
-  const _autoScope = {};
   const autoScope = modelSettings.autoscope || modelSettings.autoScope;
-  if (!autoScope || autoScope.length == 0) {
+  if (!autoScope || autoScope.length === 0) {
     return next();
   }
 
@@ -196,8 +194,8 @@ function afterAccess(ctx, next) {
 
     // Filter out the redundent records from result by applying unique validation.
     if (uniq.length > 0) {
-      //resultData = _.uniq(resultData, value => uniq.map(u => value[u]).join('-'));
-      resultData = _.uniqWith(resultData, function (value1, value2) { return uniq.map(u => value1[u]).join('-') === uniq.map(u => value2[u]).join('-') });
+      // resultData = _.uniq(resultData, value => uniq.map(u => value[u]).join('-'));
+      resultData = _.uniqWith(resultData, function (value1, value2) { return uniq.map(u => value1[u]).join('-') === uniq.map(u => value2[u]).join('-'); });
       // resultData = _.intersection.apply(this, _.chain(uniq).map(function (v) { return _.uniq(resultData, v) }).value());
     }
     ctx.accdata = resultData;
@@ -210,9 +208,9 @@ function createQuery(ctx, context, key) {
   const upward = ctx.Model.definition.settings.upward || false;
   let depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
   let query = {};
-  //const key = hierarchy; //`_hierarchyScope.${hierarchy}`;
+  // const key = hierarchy; //`_hierarchyScope.${hierarchy}`;
   const regexString = context[key];
-  key = "_autoScope." + key;
+  key = '_autoScope.' + key;
   const orParms = [];
   let modifiedRegex;
 
@@ -230,10 +228,10 @@ function createQuery(ctx, context, key) {
         if (i === 0) {
           modifiedRegex = `^${regexString}$`;
         } else {
-          //modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}[[:alnum:]]*/$`;
+          // modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}[[:alnum:]]*/$`;
           modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}[0-9a-zA-Z\'_\-]*/$`;
         }
-        query[key] = new RegExp(modifiedRegex); //toRegExp(modifiedRegex);
+        query[key] = new RegExp(modifiedRegex);
         orParms.push(query);
       }
       mergeQuery(ctx.query, {
@@ -258,7 +256,7 @@ function createQuery(ctx, context, key) {
       if (modifiedRegex === '/$' || modifiedRegex === '$') {
         break;
       }
-      query[key] = new RegExp(modifiedRegex); //toRegExp(modifiedRegex);
+      query[key] = new RegExp(modifiedRegex);
       orParms.push(query);
     }
     mergeQuery(ctx.query, {
@@ -266,6 +264,7 @@ function createQuery(ctx, context, key) {
         or: orParms
       }
     });
+    log.debug(ctx.options, 'Final formed query', ctx.query);
   }
 }
 
@@ -278,7 +277,7 @@ function beforeAccess(ctx, next) {
   }
 
   // adding hierarchyScope setting.
-  if (!modelSettings.autoscope|| ctx.options.ignoreAutoScope) {
+  if (!modelSettings.autoscope || ctx.options.ignoreAutoScope) {
     return next();
   }
 
