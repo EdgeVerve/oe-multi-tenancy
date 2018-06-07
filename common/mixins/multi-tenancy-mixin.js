@@ -99,7 +99,7 @@ function beforeSave(ctx, next) {
   }
 
   // get default autoscope value from config files
-  const defaultValue = ctx.Model.app.get('defaultAutoScope') || 'default';
+  const defaultValue = ctx.Model.app.get('defaultAutoScope') || '/default';
 
   if (callContext.ignoreAutoScope) {
     if (!callContext.useScopeAsIs) {
@@ -191,7 +191,7 @@ function afterAccess(ctx, next) {
     // var sortFields = uniq.concat(['weights']);
     // var sortOrders = _.fill(Array(sortFields.length), 'desc');
     // Lodash v3.10.1
-    resultData = _.sortByOrder(resultData, 'weight', 'desc');
+    resultData = _.orderBy(resultData, 'weight', 'desc');
 
     // Filter out the redundent records from result by applying unique validation.
     if (uniq.length > 0) {
@@ -230,7 +230,7 @@ function createQuery(ctx, context, key) {
           modifiedRegex = `^${regexString}$`;
         } else {
           // modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}[[:alnum:]]*/$`;
-          modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}[0-9a-zA-Z\'_\-]*/$`;
+          modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}/[0-9a-zA-Z\'_\-]*$`;
         }
         query[key] = new RegExp(modifiedRegex);
         orParms.push(query);
@@ -248,16 +248,16 @@ function createQuery(ctx, context, key) {
     for (let j = 0; j <= depth; j++) {
       query = {};
       if (j === 0) {
-        modifiedRegex = `^${regexString}$`;
+        modifiedRegex = `${regexString}`;
       } else {
         const ary = modifiedRegex.split('/');
-        ary.splice(ary.length - 2, 1);
-        modifiedRegex = ary.join();
+        ary.splice(ary.length-1, 1);
+        modifiedRegex = ary.join('/');
       }
-      if (modifiedRegex === '/$' || modifiedRegex === '$') {
+      if (modifiedRegex === "" || modifiedRegex === '/$' || modifiedRegex === '$') {
         break;
       }
-      query[key] = new RegExp(modifiedRegex);
+      query[key] = new RegExp("^" + modifiedRegex + "$");
       orParms.push(query);
     }
     mergeQuery(ctx.query, {
