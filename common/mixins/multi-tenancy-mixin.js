@@ -207,7 +207,7 @@ function afterAccess(ctx, next) {
 
 function createQuery(ctx, context, key) {
   const upward = ctx.Model.definition.settings.upward || ctx.options.upward || false;
-  //let depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
+  // let depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
   let depth = ctx.options.depth || 0;
   let query = {};
   // const key = hierarchy; //`_hierarchyScope.${hierarchy}`;
@@ -252,13 +252,13 @@ function createQuery(ctx, context, key) {
         modifiedRegex = `${regexString}`;
       } else {
         const ary = modifiedRegex.split('/');
-        ary.splice(ary.length-1, 1);
+        ary.splice(ary.length - 1, 1);
         modifiedRegex = ary.join('/');
       }
-      if (modifiedRegex === "" || modifiedRegex === '/$' || modifiedRegex === '$') {
+      if (modifiedRegex === '' || modifiedRegex === '/$' || modifiedRegex === '$') {
         break;
       }
-      query[key] = new RegExp("^" + modifiedRegex + "$");
+      query[key] = new RegExp('^' + modifiedRegex + '$');
       orParms.push(query);
     }
     mergeQuery(ctx.query, {
