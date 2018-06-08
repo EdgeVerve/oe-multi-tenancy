@@ -156,7 +156,8 @@ function afterAccess(ctx, next) {
     return next();
   }
 
-  const upward = modelSettings.upward || false;
+  // const upward = modelSettings.upward || false;
+  const upward = modelSettings.upward || ctx.options.upward || false;
 
   let resultData = [];
   const result = ctx.accdata;

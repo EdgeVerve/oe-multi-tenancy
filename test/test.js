@@ -256,14 +256,14 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     });
   });
 
-  it('t18 getting record for /default/infosys/ev scope with depth=2', function (done) {
+  it('t19 getting record for /default/infosys/ev scope with depth=2', function (done) {
     Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2 }, function (err, results) {
       expect(results.length).to.equal(1);
       return done(err);
     });
   });
 
-  it('t19 getting record for /default/infosys/ev scope with depth=2 - with upward direction. no bpo customers should come', function (done) {
+  it('t20 getting record for /default/infosys/ev scope with depth=2 - with upward direction. no bpo customers should come', function (done) {
     Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
       expect(results.length).to.equal(4);
       for (var i = 0; i < results.length; ++i) {
@@ -272,6 +272,49 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
         }
       }
       return done(err);
+    });
+  });
+
+  it('t21 trying to modify record of other tenant - should throw error', function (done) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
+      expect(results.length).to.equal(4);
+      var rcd;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].name.toLowerCase().indexOf("bpo") >= 0) {
+          return done(new Error("BPO Customer should not be retrieved."))
+        }
+        if (results[i].name.toLowerCase().indexOf("infosys customer") >= 0) {
+          rcd = results[i];
+        }
+      }
+      expect(rcd).to.be.defined;
+      rcd.updateAttributes({ name: "infosys customer modified", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
+        expect(err).to.be.defined;
+        if (!err) {
+          return done(new Error("Expected Error"));
+        }
+        return done();
+      });
+    });
+  });
+
+  it('t22 trying to modify record of same tenant', function (done) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
+      expect(results.length).to.equal(4);
+      var rcd;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].name.toLowerCase().indexOf("bpo") >= 0) {
+          return done(new Error("BPO Customer should not be retrieved."))
+        }
+        if (results[i].name.toLowerCase().indexOf("ev customer") >= 0) {
+          rcd = results[i];
+        }
+      }
+      expect(rcd).to.be.defined;
+      rcd.updateAttributes({ name: "EV Customer modified", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
+        expect(result.name).to.be.equal("EV Customer modified");
+        return done(err);
+      });
     });
   });
 
