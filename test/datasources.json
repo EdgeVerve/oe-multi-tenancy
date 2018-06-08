@@ -10,8 +10,8 @@
   "db": {
     "host": "localhost",
     "port": 27017,
-    "url": "mongodb://localhost:27017/oe-cache-test",
-    "database": "oe-cache-test",
+    "url": "mongodb://localhost:27017/oe-multi-tenancy-test",
+    "database": "oe-multi-tenancy-test",
     "password": "admin",
     "name": "db",
     "connector": "mongodb",

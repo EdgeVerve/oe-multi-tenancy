@@ -206,8 +206,9 @@ function afterAccess(ctx, next) {
 
 
 function createQuery(ctx, context, key) {
-  const upward = ctx.Model.definition.settings.upward || false;
-  let depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
+  const upward = ctx.Model.definition.settings.upward || ctx.options.upward || false;
+  //let depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
+  let depth = ctx.options.depth || 0;
   let query = {};
   // const key = hierarchy; //`_hierarchyScope.${hierarchy}`;
   const regexString = context[key];
@@ -288,11 +289,10 @@ function beforeAccess(ctx, next) {
   context = convertToLowerCase(context);
   const autoScope = modelSettings.autoscope;
 
-  autoScope.forEach((key) => {
-    if (typeof key === 'string') {
-      if (context && context[key]) {
-        createQuery(ctx, context, key);
-      }
+  for (var i = 0; i < autoScope.length; ++i) {
+    var key = autoScope[i];
+    if (context && context[key]) {
+      createQuery(ctx, context, key);
     } else {
       const err = new Error();
       err.name = 'Auto Scope Definition Error';
@@ -302,7 +302,7 @@ function beforeAccess(ctx, next) {
       err.retriable = false;
       return next(err);
     }
-  });
+  }
   return next();
 }
 
