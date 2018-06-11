@@ -5,7 +5,7 @@
  *
  */
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
-var dbName = process.env.DB_NAME || 'oe-cache-test';
+var dbName = process.env.DB_NAME || 'oe-multi-tenancy-test';
 module.exports = 
 {
   "memdb": {

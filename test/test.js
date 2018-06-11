@@ -275,7 +275,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     });
   });
 
-  it('t21 trying to modify record of other tenant - should throw error', function (done) {
+  it('t21 trying to modify record of other tenant - should create new record', function (done) {
     Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
       expect(results.length).to.equal(4);
       var rcd;
@@ -288,11 +288,9 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
         }
       }
       expect(rcd).to.be.defined;
-      rcd.updateAttributes({ name: "infosys customer modified", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        expect(err).to.be.defined;
-        if (!err) {
-          return done(new Error("Expected Error"));
-        }
+      rcd.updateAttributes({ name: "Infosys Customer modified by EV", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
+        expect(err).to.exists;
+        expect(rcd.id).to.not.equal(result.id);
         return done();
       });
     });
@@ -300,7 +298,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
 
   it('t22 trying to modify record of same tenant', function (done) {
     Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
-      expect(results.length).to.equal(4);
+      expect(results.length).to.equal(5); // since above test case will create new record
       var rcd;
       for (var i = 0; i < results.length; ++i) {
         if (results[i].name.toLowerCase().indexOf("bpo") >= 0) {
