@@ -275,7 +275,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     });
   });
 
-  it('t21 trying to modify record of other tenant - should create new record', function (done) {
+  it('t21 trying to modify record of other tenant using updateAttributes- should create new record', function (done) {
     Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
       expect(results.length).to.equal(4);
       var rcd;
@@ -287,7 +287,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
           rcd = results[i];
         }
       }
-      expect(rcd).to.be.defined;
+      expect(rcd).to.exists;
       rcd.updateAttributes({ name: "Infosys Customer modified by EV", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
         expect(err).to.exists;
         expect(rcd.id).to.not.equal(result.id);
@@ -308,7 +308,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
           rcd = results[i];
         }
       }
-      expect(rcd).to.be.defined;
+      expect(rcd).to.exists;
       rcd.updateAttributes({ name: "EV Customer modified", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
         expect(result.name).to.be.equal("EV Customer modified");
         return done(err);
@@ -316,5 +316,96 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     });
   });
 
+  it('t23 trying to modify record of other tenant default using replaceById - should create new record', function (done) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
+      expect(results.length).to.equal(5);
+      var rcd;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].name.toLowerCase().indexOf("bpo") >= 0) {
+          return done(new Error("BPO Customer should not be retrieved."))
+        }
+        if (results[i].name.toLowerCase().indexOf("customer a") >= 0) {
+          rcd = results[i];
+        }
+      }
+      expect(rcd).to.exists;
+      Customer.replaceById(rcd.id, { name: "Customer A modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
+        expect(err).to.exists;
+        expect(rcd.id).to.not.equal(result.id);
+        return done();
+      });
+    });
+  });
+
+  it('t24 creating multiple records for default tenant', function (done) {
+    Customer.create([{ name: "Test1", age: 50 }, { name: "Test2", age: 50 }, { name: "Test3", age: 50 }], { ctx: { tenantId: '/default' } }, function (err, results) {
+      expect(err).to.be.null;
+      return done();
+    });
+  });
+
+  it('t25 trying to modify record of other tenant using replaceAttributes - should create new record', function (done) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
+      expect(results.length).to.equal(9);
+      var rcd;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].name.toLowerCase().indexOf("bpo") >= 0) {
+          return done(new Error("BPO Customer should not be retrieved."))
+        }
+        if (results[i].name.toLowerCase().indexOf("test1") >= 0) {
+          rcd = results[i];
+        }
+      }
+      expect(rcd).to.exists;
+      rcd.replaceAttributes({ name: "test1 modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
+        expect(err).to.exists;
+        expect(rcd.id).to.not.equal(result.id);
+        return done();
+      });
+    });
+  });
+
+  it('t26 trying to modify record of other tenant using replaceOrCreate  - should create new record', function (done) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
+      expect(results.length).to.equal(10);
+      var rcd;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].name.toLowerCase().indexOf("bpo") >= 0) {
+          return done(new Error("BPO Customer should not be retrieved."))
+        }
+        if (results[i].name.toLowerCase().indexOf("test2") >= 0) {
+          rcd = results[i];
+        }
+      }
+      expect(rcd).to.exists;
+      Customer.replaceOrCreate({ name: "test2 modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
+        expect(err).to.exists;
+        expect(rcd.id).to.not.equal(result.id);
+        return done();
+      });
+    });
+  });
+
+
+  it('t27 trying to modify record of other tenant using upsert  - should create new record', function (done) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
+      expect(results.length).to.equal(11);
+      var rcd;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].name.toLowerCase().indexOf("bpo") >= 0) {
+          return done(new Error("BPO Customer should not be retrieved."))
+        }
+        if (results[i].name.toLowerCase().indexOf("test3") >= 0) {
+          rcd = results[i];
+        }
+      }
+      expect(rcd).to.exists;
+      Customer.upsert({ name: "test3 modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
+        expect(err).to.exists;
+        expect(rcd.id).to.not.equal(result.id);
+        return done();
+      });
+    });
+  });
 });
 
