@@ -116,7 +116,7 @@ function beforeSave(ctx, next) {
         const f1 = context[key] || '';
         const f2 = currentAutoScope[key] || '';
         if (f1 !== f2) {
-          const error = new Error(`could not find a model with id ${ctx.currentInstance.id}`);
+          const error = new Error(`could not find a model with id ${ctx.currentInstance.id} for key ${key}`);
           error.statusCode = 404;
           error.code = 'MODEL_NOT_FOUND';
           error.retriable = false;

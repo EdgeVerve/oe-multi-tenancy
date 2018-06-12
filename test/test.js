@@ -289,7 +289,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       }
       expect(rcd).to.exists;
       rcd.updateAttributes({ name: "Infosys Customer modified by EV", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        expect(err).to.exists;
+        console.log(err);
         expect(rcd.id).to.not.equal(result.id);
         return done();
       });
