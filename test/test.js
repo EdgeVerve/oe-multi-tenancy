@@ -341,7 +341,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       }
       expect(rcd).to.exists;
       Customer.replaceById(rcd.id, { name: "Customer A modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        expect(rcd.id).to.not.equal(result.id);
+        expect(rcd.id.toString()).to.not.equal(result.id.toString());
         return done();
       });
     });
@@ -368,7 +368,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       }
       expect(rcd).to.exists;
       rcd.replaceAttributes({ name: "test1 modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        expect(rcd.id).to.not.equal(result.id);
+        expect(rcd.id.toString()).to.not.equal(result.id.toString());
         return done(err);
       });
     });
@@ -388,7 +388,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       }
       expect(rcd).to.exists;
       Customer.replaceOrCreate({ name: "test2 modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        expect(rcd.id).to.not.equal(result.id);
+        expect(rcd.id.toString()).to.not.equal(result.id.toString());
         return done(err);
       });
     });
@@ -422,7 +422,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       var rcd = results[0];
       expect(rcd).to.exists;
       Customer.replaceOrCreate({ name: "test2 modified by infy ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        expect(rcd.id).to.equal(result.id);
+        expect(rcd.id.toString()).to.equal(result.id.toString());
         if (err) return done(err);
         Customer.find({ where: {id : rcd.id}}, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, results) {
           expect(results[0].name).to.equal("test2 modified by infy ev")
