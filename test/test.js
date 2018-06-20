@@ -168,8 +168,20 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
   it('t10 getting record for /default scope. should retrieve two records', function (done) {
     Customer.find({}, { ctx: { tenantId: "/default" } }, function (err, results) {
       expect(results.length).to.equal(2);
-      expect(results[0].name).to.equal('Customer A');
-      expect(results[1].name).to.equal('Customer AA');
+      var f1, f2;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].name === "Customer A") {
+          f1 = 1;
+        }
+        else if (results[i].name === "Customer AA") {
+          f2 = 1;
+        }
+      }
+      if (!f1 || !f2) {
+        return done(new Error("Expecting two records Cuatomer A and Customer AA"));
+      }
+      //expect(results[0].name).to.equal('Customer A');
+      //expect(results[1].name).to.equal('Customer AA');
       return done(err);
     });
   });
@@ -224,7 +236,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       var result = response.body;
       expect(result.length).to.be.equal(1);
       expect(result[0].name).to.be.equal("Infosys Customer");
-      done();
+      done(err);
     });
   });
 
@@ -289,9 +301,8 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       }
       expect(rcd).to.exists;
       rcd.updateAttributes({ name: "Infosys Customer modified by EV", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        console.log(err);
         expect(rcd.id).to.not.equal(result.id);
-        return done();
+        return done(err);
       });
     });
   });
@@ -330,7 +341,6 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       }
       expect(rcd).to.exists;
       Customer.replaceById(rcd.id, { name: "Customer A modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        expect(err).to.exists;
         expect(rcd.id).to.not.equal(result.id);
         return done();
       });
@@ -358,9 +368,8 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       }
       expect(rcd).to.exists;
       rcd.replaceAttributes({ name: "test1 modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        expect(err).to.exists;
         expect(rcd.id).to.not.equal(result.id);
-        return done();
+        return done(err);
       });
     });
   });
@@ -379,9 +388,8 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       }
       expect(rcd).to.exists;
       Customer.replaceOrCreate({ name: "test2 modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
-        expect(err).to.exists;
         expect(rcd.id).to.not.equal(result.id);
-        return done();
+        return done(err);
       });
     });
   });
@@ -403,7 +411,24 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       Customer.upsert({ name: "test3 modified by ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
         expect(err).to.exists;
         expect(rcd.id).to.not.equal(result.id);
-        return done();
+        return done(err);
+      });
+    });
+  });
+
+  it('t26 trying to modify record of other tenant using replaceOrCreate  - should update existing record', function (done) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, results) {
+      expect(results.length).to.equal(6);
+      var rcd = results[0];
+      expect(rcd).to.exists;
+      Customer.replaceOrCreate({ name: "test2 modified by infy ev", age: 1111, id: rcd.id }, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, result) {
+        expect(rcd.id).to.equal(result.id);
+        if (err) return done(err);
+        Customer.find({ where: {id : rcd.id}}, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, results) {
+          expect(results[0].name).to.equal("test2 modified by infy ev")
+          return done(err);
+        });
+
       });
     });
   });
