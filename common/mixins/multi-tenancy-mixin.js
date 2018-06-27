@@ -79,12 +79,16 @@ function beforeSave(ctx, next) {
   }
 
   const callContext = ctx.options;
+  if (ctx.options.ignoreAutoScope || ctx.options.fetchAllScopes) {
+    return next();
+  }
 
   // Clone callContext.ctx so the any changes locally made will not affect callContext.ctx.
   let context = Object.assign({}, callContext.ctx);
 
   // Convert the callcontext to lowercase.
   context = convertToLowerCase(context);
+
 
   const data = ctx.data || ctx.instance;
   const _autoScope = {};
@@ -94,7 +98,7 @@ function beforeSave(ctx, next) {
   }
 
   let currentAutoScope;
-  if (!ctx.IsNewInstance && ctx.currentInstance) {
+  if (!ctx.isNewInstance && ctx.currentInstance) {
     currentAutoScope = ctx.currentInstance._autoScope;
   }
 
@@ -153,6 +157,10 @@ function afterAccess(ctx, next) {
   }
   const autoScope = modelSettings.autoscope || modelSettings.autoScope;
   if (!autoScope || autoScope.length === 0) {
+    return next();
+  }
+
+  if (ctx.options.ignoreAutoScope || ctx.options.fetchAllScopes) {
     return next();
   }
 
@@ -279,8 +287,12 @@ function beforeAccess(ctx, next) {
     return next();
   }
 
+  const autoScope = modelSettings.autoscope || modelSettings.autoScope;
+  if (!autoScope || autoScope.length === 0) {
+    return next();
+  }
   // adding hierarchyScope setting.
-  if (!modelSettings.autoscope || ctx.options.ignoreAutoScope) {
+  if (ctx.options.ignoreAutoScope || ctx.options.fetchAllScopes) {
     return next();
   }
 
@@ -288,7 +300,6 @@ function beforeAccess(ctx, next) {
   let context = Object.assign({}, callContext.ctx);
   // Convert the callcontext to lowercase.
   context = convertToLowerCase(context);
-  const autoScope = modelSettings.autoscope;
 
   for (var i = 0; i < autoScope.length; ++i) {
     var key = autoScope[i];
@@ -306,5 +317,3 @@ function beforeAccess(ctx, next) {
   }
   return next();
 }
-
-
