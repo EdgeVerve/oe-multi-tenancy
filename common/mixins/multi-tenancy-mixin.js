@@ -15,7 +15,7 @@ module.exports = Model => {
 
   // Making _autoScope and _scope as hidden fields.
   if (Model.definition.settings.hidden) {
-    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_autoscope']);
+    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_autoScope']);
   } else {
     Model.definition.settings.hidden = ['_autoScope'];
   }
