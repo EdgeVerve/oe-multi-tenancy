@@ -85,7 +85,7 @@ function beforeSave(ctx, next) {
 
   const callContext = ctx.options;
   if (ctx.options.ignoreAutoScope || ctx.options.fetchAllScopes) {
-    if (!data._autoScope) {
+    if (!data._autoScope || _.isEmpty(data._autoScope)) {
       data._autoScope = utils.getDefaultContext(autoScopeFields);
     }
     return next();
