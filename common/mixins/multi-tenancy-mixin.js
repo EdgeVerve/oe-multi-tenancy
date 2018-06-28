@@ -2,6 +2,7 @@
 const toRegExp = require('loopback-datasource-juggler/lib/utils').toRegExp;
 const _ = require('lodash');
 const log = require('oe-logger')('multi-tenancy-mixin');
+const utils = require('../../lib/utils.js');
 
 module.exports = Model => {
   if (Model.modelName === 'BaseEntity') {
@@ -68,8 +69,6 @@ function convertToLowerCase(input) {
     return resObj;
   }
 }
-
-
 function beforeSave(ctx, next) {
   const modelSettings = ctx.Model.definition.settings;
 
@@ -77,9 +76,18 @@ function beforeSave(ctx, next) {
   if (modelSettings.mixins.MultiTenancyMixin === false) {
     return next();
   }
+  const autoScopeFields = modelSettings.autoscope || modelSettings.autoScope;
+  if (!autoScopeFields || autoScopeFields.length === 0) {
+    return next();
+  }
+
+  const data = ctx.data || ctx.instance;
 
   const callContext = ctx.options;
   if (ctx.options.ignoreAutoScope || ctx.options.fetchAllScopes) {
+    if (!data._autoScope) {
+      data._autoScope = utils.getDefaultContext(autoScopeFields);
+    }
     return next();
   }
 
@@ -89,13 +97,7 @@ function beforeSave(ctx, next) {
   // Convert the callcontext to lowercase.
   context = convertToLowerCase(context);
 
-
-  const data = ctx.data || ctx.instance;
   const _autoScope = {};
-  const autoScope = modelSettings.autoscope || modelSettings.autoScope;
-  if (!autoScope || autoScope.length === 0) {
-    return next();
-  }
 
   let currentAutoScope;
   if (!ctx.isNewInstance && ctx.currentInstance) {
@@ -107,23 +109,23 @@ function beforeSave(ctx, next) {
 
   if (callContext.ignoreAutoScope) {
     if (!callContext.useScopeAsIs) {
-      autoScope.forEach((key) => {
-        _autoScope[key] = defaultValue;
-      });
+      for (var i = 0; i < autoScopeFields.length; ++i) {
+        _autoScope[autoScopeFields[i]] = defaultValue;
+      }
     } else {
       return next();
     }
   } else {
-    for (var i = 0; i < autoScope.length; ++i) {
-      var key = autoScope[i];
+    for (i = 0; i < autoScopeFields.length; ++i) {
+      var key = autoScopeFields[i];
       if (currentAutoScope) {
         const f1 = context[key] || '';
         const f2 = currentAutoScope[key] || '';
         if (f1 !== f2) {
-          const error = new Error(`could not find a model with id ${ctx.currentInstance.id} for key ${key}`);
-          error.statusCode = 404;
-          error.code = 'MODEL_NOT_FOUND';
-          error.retriable = false;
+          const error = new Error({ message: `could not find a model with id ${ctx.currentInstance.id} for key ${key}`,  statusCode: 404, code: 'MODEL_NOT_FOUND', retriable: false } );
+          // error.statusCode = 404;
+          // error.code = 'MODEL_NOT_FOUND';
+          // error.retriable = false;
           return next(error);
         }
       }
@@ -134,12 +136,13 @@ function beforeSave(ctx, next) {
       } else {
         // throws an Error when model is autoscope on some contributor
         // but contributor values are not provided.
-        const err1 = new Error();
-        err1.name = 'Data Personalization error';
-        err1.message = `insufficient data! Autoscoped values not found for the model${ctx.Model.modelName} key ${key}`;
-        err1.code = 'DATA_PERSONALIZATION_ERROR_029';
-        err1.type = 'AutoScopeValuesNotFound';
-        err1.retriable = false;
+        const err1 = new Error({message: `insufficient data! Autoscoped values not found for the model${ctx.Model.modelName} key ${key}`, name: 'Data Personalization error',
+          code: 'DATA_PERSONALIZATION_ERROR_029', type: 'AutoScopeValuesNotFound', retriable: false});
+        // err1.name = 'Data Personalization error';
+        // err1.message = ;
+        // err1.code = 'DATA_PERSONALIZATION_ERROR_029';
+        // err1.type = 'AutoScopeValuesNotFound';
+        // err1.retriable = false;
         return next(err1);
       }
     }
