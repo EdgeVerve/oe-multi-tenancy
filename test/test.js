@@ -65,7 +65,16 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     app.on('test-start', function () {
       Customer = loopback.findModel("Customer");
       var userModel = loopback.findModel("User");
-      userModel.destroyAll({}, {}, function (err) {
+      userModel.destroyAll({}, {}, function (err, r) {
+        console.log(err, r);
+        userModel.find({}, {}, function(err2, r2){
+            if(err2){
+                return done(err2);
+            }
+            if(r2 && r2.length > 0){
+                return done(new Error("Error : Users were not deleted from database."));
+            }
+        })
         return done(err);
       });
     });
@@ -118,7 +127,9 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     { username: "infyuser", password: "infyuser", email: "infyuser@infyuser.com" },
     { username: "bpouser", password: "bpouser", email: "infyuser@infyuser.com" }])
     .end(function (err, response) {
-      
+      if(err){
+          return done(err);
+      }
       var result = response.body;
       expect(result[0].id).to.be.defined;
       expect(result[1].id).to.be.defined;
