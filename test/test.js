@@ -125,7 +125,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     .send([{username: "admin", password:"admin", email: "admin@admin.com" },
     { username: "evuser", password: "evuser", email: "evuser@evuser.com" },
     { username: "infyuser", password: "infyuser", email: "infyuser@infyuser.com" },
-    { username: "bpouser", password: "bpouser", email: "infyuser@infyuser.com" }])
+    { username: "bpouser", password: "bpouser", email: "bpouser@bpouser.com" }])
     .end(function (err, response) {
       if(err){
           return done(err);
