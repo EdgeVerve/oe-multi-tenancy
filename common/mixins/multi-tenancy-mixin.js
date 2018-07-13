@@ -1,4 +1,4 @@
-﻿const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
+const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
 const toRegExp = require('loopback-datasource-juggler/lib/utils').toRegExp;
 const _ = require('lodash');
 const log = require('oe-logger')('multi-tenancy-mixin');
@@ -122,7 +122,9 @@ function beforeSave(ctx, next) {
         const f1 = context[key] || '';
         const f2 = currentAutoScope[key] || '';
         if (f1 !== f2) {
-          const error = new Error({ message: `could not find a model with id ${ctx.currentInstance.id} for key ${key}`,  statusCode: 404, code: 'MODEL_NOT_FOUND', retriable: false } );
+          const error = new Error();
+          Object.assign(error, { message: `could not find a model with id ${ctx.currentInstance.id} for key ${key}`,  statusCode: 404, code: 'MODEL_NOT_FOUND', retriable: false });
+          // const error = new Error({ message: `could not find a model with id ${ctx.currentInstance.id} for key ${key}`,  statusCode: 404, code: 'MODEL_NOT_FOUND', retriable: false } );
           // error.statusCode = 404;
           // error.code = 'MODEL_NOT_FOUND';
           // error.retriable = false;
@@ -136,8 +138,11 @@ function beforeSave(ctx, next) {
       } else {
         // throws an Error when model is autoscope on some contributor
         // but contributor values are not provided.
-        const err1 = new Error({message: `insufficient data! Autoscoped values not found for the model${ctx.Model.modelName} key ${key}`, name: 'Data Personalization error',
-          code: 'DATA_PERSONALIZATION_ERROR_029', type: 'AutoScopeValuesNotFound', retriable: false});
+        //log.error(`insufficient data! Autoscoped values not found for the model ${ctx.Model.modelName} key ${key}`);
+        var err1 = new Error();
+        Object.assign(err1, {message: `insufficient data! Autoscoped values not found for the model${ctx.Model.modelName} key ${key}`, name: 'Data Personalization error', code: 'DATA_PERSONALIZATION_ERROR_029', type: 'AutoScopeValuesNotFound', retriable: false});
+        // const err1 = new Error({message: `insufficient data! Autoscoped values not found for the model${ctx.Model.modelName} key ${key}`, name: 'Data Personalization error',
+        // code: 'DATA_PERSONALIZATION_ERROR_029', type: 'AutoScopeValuesNotFound', retriable: false});
         // err1.name = 'Data Personalization error';
         // err1.message = ;
         // err1.code = 'DATA_PERSONALIZATION_ERROR_029';
