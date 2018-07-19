@@ -1,3 +1,11 @@
+/**
+ *
+ * ©2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
+
+// Author : Atul
 const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
 const toRegExp = require('loopback-datasource-juggler/lib/utils').toRegExp;
 const _ = require('lodash');
