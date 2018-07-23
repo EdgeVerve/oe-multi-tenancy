@@ -14,9 +14,7 @@
     "grunt-cover": "grunt test-with-coverage"
   },
   "dependencies": {
-    "async": "^2.5.0",
     "oe-logger": "^1.0.0",
-    "camelcase": "^3.0.0",
     "lodash": "4.17.10",
     "oe-cloud": "git+http://evgit/atul/oe-cloud.git#master"
   },
