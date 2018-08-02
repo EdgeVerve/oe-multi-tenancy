@@ -16,7 +16,7 @@
   "dependencies": {
     "oe-logger": "^1.0.0",
     "lodash": "4.17.10",
-    "oe-cloud": "git+http://evgit/atul/oe-cloud.git#master"
+    "oe-cloud": "git+http://evgit/oec-next/oe-cloud.git#master"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
@@ -38,11 +38,11 @@
     "mocha": "^3.4.2",
     "superagent-defaults": "^0.1.14",
     "supertest": "^1.1.0",
-    "loopback-connector-postgresql": "git+http://evgit/atul/loopback-connector-postgresql.git#master"
+    "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git#master"
   },
   "repository": {
     "type": "git",
-    "url": "git@evgit:atul/oe-multi-tenancy.git"
+    "url": "git@evgit:oec-next/oe-multi-tenancy.git"
   },
   "license": "MIT"
 }
