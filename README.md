@@ -1,37 +1,49 @@
 # oe-multi-tenancy module
 
-## Introduction 
-
+# Introduction
 This node module is responsible for data separation in multi-tenant environment. This version of oeCloud clearly differentiates Data Seperation from Personalization. This is typically important when application is hosted on cloud where more than one customer(tenant) shares same infrastructure.
-Multi tenancy is more about data separation. Using this mixin, in multi tenant environment developer can control how data can be seperated. In very simple language, one tenant cannot see or modify other tenant's data.
+Multi tenancy is more about data separation. Using this module, in multi tenant environment developer can control how data can be seperated. In very simple language, one tenant cannot see or modify other tenant's data.
 
 ## Dependency
 * oe-logger
 * oe-cloud
 
-## User Guide
 
-Section below will give detail explaination no how to use this module in your oe-cloud based project.
+## Getting Started
+
+In this section, we will see how we can use install this module in our project. To use this multi tenancy feature in project from this module, you must install this module.
+
 
 ### Installation
 
-Have entry of oe-multy-tenancy in your package.json of application.
+To use oe-multi-tenancy in your project, you must include this package into your package.json as shown below. So when you do **npm install** this package will be made available. Please ensure the source of this package is right and updated. For now we will be using **evgit** as source. Also, please note that, to use this module, you project must be **oeCloud** based project.
 
-package.json
-```JavaScript
+
+```javascript
 "oe-multi-tenancy": "git+http://<gitpath>/oe-multi-tenancy.git#master"
 ```
 
-You can also install this module on command line.
+You can also install this mixin on command line using npm install. 
+
 
 ```sh
 $ npm install <git path oe-multi-tenancy> --no-optional
 ```
-or (When it is made available in npm registry)
+
+
+### Testing and Code coverage
 
 ```sh
-$ npm install oe-multi-tenancy --no-optional
+$ git clone http://evgit/oec-next/oe-multi-tenancy.git
+$ cd oe-multi-tenancy
+$ npm install --no-optional
+$ npm run grunt-cover
 ```
+
+you should see coverage report in coverage folder.
+
+
+
 
 
 ### Loading oe-multy-tenancy module
