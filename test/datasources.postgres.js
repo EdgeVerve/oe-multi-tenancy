@@ -24,7 +24,7 @@ module.exports =
     "database": dbName,
     "password": "postgres",
     "name": "db",
-    "connector": "loopback-connector-postgresql",
+    "connector": "oe-connector-postgresql",
     "user": "postgres",
     "max": 50,
     "connectionTimeout": 50000
