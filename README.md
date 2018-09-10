@@ -1,5 +1,22 @@
 # oe-multi-tenancy module
 
+- [oe-multi-tenancy module](#oe-multi-tenancy-module)
+- [Introduction](#introduction)
+  * [TenantID is not special](#tenantid-is-not-special)
+  * [Difference between oeCloud 1.x and 2.x](#difference-between-oecloud-1x-and-2x)
+- [Getting Started](#getting-started)
+  * [Dependency](#dependency)
+  * [Testing and Code coverage](#testing-and-code-coverage)
+  * [Installation](#installation)
+    + [Attaching to Application](#attaching-to-application)
+    + [Enabling or Disabling](#enabling-or-disabling)
+- [API Documentation](#api-documentation)
+  * [setBaseEntityAutoscope(autoscopeFields)](#setbaseentityautoscope-autoscopefields-)
+  * [isDefaultContext(ctx)](#isdefaultcontext-ctx-)
+  * [getDefaultContext(autoscope)](#getdefaultcontext-autoscope-)
+- [Tutorial](#tutorial)
+  * [Basic Use](#basic-use)
+
 # Introduction
 This node module is responsible for data separation in multi-tenant environment. This version of oeCloud (v 2.x) clearly differentiates Data Seperation from Personalization.  
 Multi tenancy is more about data separation. Multi tenancy is typically important when application is hosted on cloud where more than one customer(tenant) shares same infrastructure.
@@ -129,7 +146,6 @@ Remember, this is based on Model and thus you can have only selected models with
 
 This is utility function which will check if given context is default context. If returns true or false based on if given ctx is of default context or not. 
 
-
 | Parameter | true or false |
 | --------- | ------------- |
 | { tenantId : '/default'} | true |
@@ -157,12 +173,12 @@ util.isDefaultContext(test); // returns true
 
 
 
-## Tutorial
+# Tutorial
 
 This module will seperate data based on tenant. Now tenant is not really 'first class citizen' in oe-cloud based application. Meaning there is no place where **tenantId** is hard coded.
 Application developer needs to configure parameter on which he/she wants to separate data. Data can be seperated by any user defined fields (eg tenantId, regionId, jobLevel etc)
 
-### Basic Use
+## Basic Use
 
 Consider following Customer model. 
 
@@ -223,15 +239,4 @@ For example, application may stores tenantId and userId mapping in database and 
 As shown in above code snippet, you can see that whenever access token is being created, this code populates tenantId as part of Access Token. 
 This way, for all requests with the this access token, tenantId will be available as part of context.
 You can thus create and designate any field which can be **autoScoped** and always made available as part of context.
-
-
-
-
-
-
-
-
-
-
-
 
