@@ -1,6 +1,5 @@
 # oe-multi-tenancy module
 
-- [oe-multi-tenancy module](#oe-multi-tenancy-module)
 - [Introduction](#introduction)
   * [TenantID is not special](#tenantid-is-not-special)
   * [Difference between oeCloud 1.x and 2.x](#difference-between-oecloud-1x-and-2x)
@@ -10,6 +9,7 @@
   * [Installation](#installation)
     + [Attaching to Application](#attaching-to-application)
     + [Enabling or Disabling](#enabling-or-disabling)
+- [Design](#design)
 - [API Documentation](#api-documentation)
   * [setBaseEntityAutoscope(autoscopeFields)](#setbaseentityautoscope-autoscopefields-)
   * [isDefaultContext(ctx)](#isdefaultcontext-ctx-)
@@ -115,6 +115,49 @@ And then you will have to enable the mixin explicitely on those model which requ
 }
 
 ```
+
+# Design
+
+This module ensures data sepetation by inforcing autoScope field values. When you define autoScope fields in any model, those field values are forced when any record is being created. Values are checked in context field. If those autoScope field values are not present in context, then it will throw error and operation will get aborted.
+
+For example, consider following model definition json. It has got autoscope fields as **tenantId** and **regionId**. Therefore, whenever there is record creation/updation on this model, these two fields are checked and enforced.
+
+```javaScript
+{
+  name : "Customer",
+  base : "BaseEntity",
+  properties : {
+    ...
+  }
+  autoscope : ["tenantId", "regionId"]
+}
+```
+
+When record is saved, autoScope fields are taken from context and saved in the database. This way, when for the same context, records are being retrieved, this module will check for autoscope fields from context and checked against records.
+
+Consider following table - while retriving records how checks are done.
+
+| Record Id | tenantId | regionId |
+| --------- | -------- | -------- |
+| 1 | /default | /default |
+| 2 | /default/icici | /default |
+| 3 | /default/icici | /default/asia |
+| 4 | /default/icici/icici-blr | /default |
+| 5 | /default | /default/asia/india |
+| 6 | /default | /default/asia |
+| 7 | /default | /default/europe |
+
+Consider following table - this shows which record will be retrieved. IT is assumed that there is unique field created in model. Since multiple records can match criteria, best match record would be returned.
+
+| request Scope tenantID | request scope regionID | records | Reason |
+| ---------------------- | ---------------------- | ------- | ------ |
+| /default | /default | 1 | default scope record will be returned | 
+| /default/citi | /default | 1 | No /default/citi available so default scoped record returned |
+| /default | default/asia | 6 | exact match found |
+| /default | default/asia | 6 | exact match found |
+| /default/icici/icici-delhi | /default/europe | 2 | there is record at default/icici. it would not return /default/europe as tenantId is of higher preference |
+| /default/icici | /default/europe | 2 | same reason as above |
+| /default/icici | /default/asia/india | 3 | closed match found |
 
 
 # API Documentation
