@@ -1,6 +1,6 @@
 /**
  *
- * ©2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * ï¿½2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
  *
  */
@@ -20,6 +20,10 @@ oecloud.boot(__dirname, function (err) {
     console.log(err);
     process.exit(1);
   }
+  var m = loopback.findModel("Model");
+  m.setOptions = function(){
+    return { ctx : { tenantId : '/anonymous'}};
+  }  
   var accessToken = loopback.findModel('AccessToken');
   accessToken.observe("before save", function (ctx, next) {
     var userModel = loopback.findModel("User");
