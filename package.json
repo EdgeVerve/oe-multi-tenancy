@@ -14,9 +14,8 @@
     "grunt-cover": "grunt test-with-coverage"
   },
   "dependencies": {
-    "oe-logger": "^1.0.0",
-    "lodash": "4.17.10",
-    "oe-cloud": "git+http://evgit/oec-next/oe-cloud.git#master"
+    "oe-cloud": "git+http://evgit/oec-next/oe-cloud.git#master",
+    "lodash": "4.17.10"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
