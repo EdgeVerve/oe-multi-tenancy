@@ -1,6 +1,6 @@
 /**
  *
- * ©2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * 2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
  *
  */
@@ -39,7 +39,7 @@ module.exports = Model => {
     Model.definition.settings.mixins = {};
   }
 
-  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.MultiTenancyMixin) || !Model.definition.settings.mixins.MultiTenancyMixin) {
+  if ((Model.settings.overridingMixins && Model.settings.overridingMixins.MultiTenancyMixin === false) || !Model.definition.settings.mixins.MultiTenancyMixin) {
     Model.evRemoveObserver('before save', beforeSave);
     Model.evRemoveObserver('access', beforeAccess);
     if (!Model.definition.settings.disableManualPersonalization) {
