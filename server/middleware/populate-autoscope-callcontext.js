@@ -10,7 +10,6 @@ const loopback = require('loopback');
 const rootModel = loopback.findModel('Model');
 module.exports = function (option) {
   return function (req, res, next) {
-    console.log('came');
     if (req.accessToken && req.accessToken.ctx) {
       if ( !req.callContext) {
         req.callContext = { ctx: {}};
@@ -23,7 +22,6 @@ module.exports = function (option) {
           req.callContext.ctx[k] = req.accessToken.ctx[k];
         }
       });
-      console.log(req.callContext);
     }
     if (_.isEmpty(req.callContext) && rootModel && rootModel.setCallContext) {
       req.callContext = rootModel.setCallContext(req);
