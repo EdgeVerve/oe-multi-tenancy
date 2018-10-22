@@ -12,9 +12,9 @@ oecloud.observe('loaded', function (ctx, next) {
   oecloud.attachMixinsToBaseEntity("MultiTenancyMixin");
   return next();
 })
-oecloud.addContextField('tenantId', {
-  type: "string"
-});
+//oecloud.addContextField('ctx', {
+//  type: "object"
+//});
 oecloud.boot(__dirname, function (err) {
   if (err) {
     console.log(err);
@@ -36,17 +36,20 @@ oecloud.boot(__dirname, function (err) {
         return next(new Error("No User Found"));
       }
       var user = result[0];
+      if(!instance.ctx){
+        instance.ctx = {};
+      }
       if (user.username === "admin") {
-        instance.tenantId = '/default';
+        instance.ctx.tenantId = '/default';
       }
       else if (user.username === "evuser") {
-        instance.tenantId = '/default/infosys/ev';
+        instance.ctx.tenantId = '/default/infosys/ev';
       }
       else if (user.username === "infyuser") {
-        instance.tenantId = '/default/infosys';
+        instance.ctx.tenantId = '/default/infosys';
       }
       else if (user.username === "bpouser") {
-        instance.tenantId = '/default/infosys/bpo';
+        instance.ctx.tenantId = '/default/infosys/bpo';
       }
       return next(err);
     });
