@@ -182,8 +182,10 @@ function afterAccess(ctx, next) {
     return next();
   }
 
-  // const upward = modelSettings.upward || false;
-  const upward = modelSettings.upward || ctx.options.upward || false;
+  var upward = modelSettings.upward || ctx.options.upward || false;
+  if (global && global.PersonalizableModels && global.PersonalizableModels[ctx.Model.modelName]) {
+    upward = true;
+  }
 
   let resultData = [];
   const result = ctx.accdata;
@@ -234,9 +236,16 @@ function afterAccess(ctx, next) {
 
 function createQuery(ctx, context, key) {
   var separator = utils.getSeparator();
-  const upward = ctx.Model.definition.settings.upward || ctx.options.upward || false;
+  // const upward = ctx.Model.definition.settings.upward || ctx.options.upward || false;
   // let depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
-  let depth = ctx.options.depth || 0;
+
+  var depth = ctx.options.depth || 0;
+  var upward = ctx.Model.definition.settings.upward || ctx.options.upward || false;
+  if (global && global.PersonalizableModels && global.PersonalizableModels[ctx.Model.modelName]) {
+    upward = true;
+    depth = '*';
+  }
+
   let query = {};
   // const key = hierarchy; //`_hierarchyScope.${hierarchy}`;
   const regexString = context[key];
