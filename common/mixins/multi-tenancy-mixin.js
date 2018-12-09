@@ -78,6 +78,7 @@ function convertToLowerCase(input) {
   }
 }
 function beforeSave(ctx, next) {
+  var separator = utils.getSeparator();
   const modelSettings = ctx.Model.definition.settings;
 
   // Checking for MultiTenancyMixin is applied or not.
@@ -113,7 +114,7 @@ function beforeSave(ctx, next) {
   }
 
   // get default autoscope value from config files
-  const defaultValue = ctx.Model.app.get('defaultAutoScope') || '/default';
+  const defaultValue = ctx.Model.app.get('defaultAutoScope') || (separator + 'default');
 
   if (callContext.ignoreAutoScope) {
     if (!callContext.useScopeAsIs) {
@@ -165,6 +166,7 @@ function beforeSave(ctx, next) {
 }
 
 function afterAccess(ctx, next) {
+  var separator = utils.getSeparator();
   const modelSettings = ctx.Model.definition.settings;
 
   // Checking for HierarchyMixin is applied or not.
@@ -194,7 +196,7 @@ function afterAccess(ctx, next) {
       let weight = 0;
       Object.keys(obj._autoScope).forEach((item) => {
         const value = obj._autoScope[item];
-        weight += value.split('/').length;
+        weight += value.split(separator).length;
       });
       obj.weight = weight;
       resultData.push(obj);
@@ -231,6 +233,7 @@ function afterAccess(ctx, next) {
 
 
 function createQuery(ctx, context, key) {
+  var separator = utils.getSeparator();
   const upward = ctx.Model.definition.settings.upward || ctx.options.upward || false;
   // let depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
   let depth = ctx.options.depth || 0;
@@ -256,7 +259,7 @@ function createQuery(ctx, context, key) {
           modifiedRegex = `^${regexString}$`;
         } else {
           // modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}[[:alnum:]]*/$`;
-          modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}/[0-9a-zA-Z\'_\-]*$`;
+          modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}${separator}[0-9a-zA-Z\'_\-]*$`;
         }
         query[key] = new RegExp(modifiedRegex);
         orParms.push(query);
@@ -269,18 +272,18 @@ function createQuery(ctx, context, key) {
     }
   } else {
     if (depth === '*') {
-      depth = regexString.split('/').length - 2;
+      depth = regexString.split(separator).length - 2;
     }
     for (let j = 0; j <= depth; j++) {
       query = {};
       if (j === 0) {
         modifiedRegex = `${regexString}`;
       } else {
-        const ary = modifiedRegex.split('/');
+        const ary = modifiedRegex.split(separator);
         ary.splice(ary.length - 1, 1);
-        modifiedRegex = ary.join('/');
+        modifiedRegex = ary.join(separator);
       }
-      if (modifiedRegex === '' || modifiedRegex === '/$' || modifiedRegex === '$') {
+      if (modifiedRegex === '' || modifiedRegex === (separator + '$') || modifiedRegex === '$') {
         break;
       }
       query[key] = new RegExp('^' + modifiedRegex + '$');
