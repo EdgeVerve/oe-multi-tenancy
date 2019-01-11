@@ -14,6 +14,7 @@
     "grunt-cover": "grunt test-with-coverage"
   },
   "dependencies": {
+    "async": "2.6.1",
     "lodash": "4.17.11"
   },
   "devDependencies": {
