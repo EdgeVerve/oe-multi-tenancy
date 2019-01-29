@@ -27,7 +27,11 @@ oecloud.boot(__dirname, function (err) {
   var accessToken = loopback.findModel('AccessToken');
   accessToken.observe("before save", function (ctx, next) {
     var userModel = loopback.findModel("User");
-    var instance = ctx.instance;
+    var instance = ctx.instance || ctx.currentInstance;
+    var data = ctx.instance || ctx.data;
+    if(!ctx.isNewInstance){
+      return next();
+    }
     userModel.find({ where: {id: instance.userId} }, {}, function (err, result) {
       if (err) {
         return next(err);
@@ -36,20 +40,20 @@ oecloud.boot(__dirname, function (err) {
         return next(new Error("No User Found"));
       }
       var user = result[0];
-      if(!instance.ctx){
-        instance.ctx = {};
+      if(!data.ctx){
+        data.ctx = {};
       }
       if (user.username === "admin") {
-        instance.ctx.tenantId = '/default';
+        data.ctx.tenantId = '/default';
       }
       else if (user.username === "evuser") {
-        instance.ctx.tenantId = '/default/infosys/ev';
+        data.ctx.tenantId = '/default/infosys/ev';
       }
       else if (user.username === "infyuser") {
-        instance.ctx.tenantId = '/default/infosys';
+        data.ctx.tenantId = '/default/infosys';
       }
       else if (user.username === "bpouser") {
-        instance.ctx.tenantId = '/default/infosys/bpo';
+        data.ctx.tenantId = '/default/infosys/bpo';
       }
       return next(err);
     });
@@ -80,6 +84,9 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     app.on('test-start', function () {
       Customer = loopback.findModel("Customer");
       var userModel = loopback.findModel("User");
+      userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', principalId: '$authenticated', principalType: 'ROLE', property: 'switchContext' });
+      userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', principalId: '$authenticated', principalType: 'ROLE', property: 'resetContext' });
+      userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', principalId: '$authenticated', principalType: 'ROLE', property: 'aboutMe' });
       userModel.destroyAll({}, {}, function (err, r) {
         console.log(err, r);
         userModel.find({}, {}, function(err2, r2){
@@ -458,5 +465,95 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       });
     });
   });
+
+  it('t27-1 Infosys Switching context to EV', function (done) {
+    var url = basePath + '/users/switchContext?access_token=' + infyToken;
+    api.set('Accept', 'application/json')
+    .post(url)
+    .send({tenantId : "/default/infosys/ev"})
+    .end(function (err, response) {
+      var result = response.body;
+      //console.log(result);
+      expect(result).to.be.defined;
+      expect(result.tenantId).to.be.equal("/default/infosys/ev");
+      done();
+    });
+  }); 
+  it('t27-2 Infosys accessing EV Data after switch context', function (done) {
+    var url = basePath + '/customers?access_token=' + infyToken;
+    api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, response) {
+      var result = response.body;
+      //console.log(result);
+      for(var i=0; i < result.length; ++i){
+        if(result[i].name.toLowerCase().indexOf("ev") < 0){
+          return done(new Error("testcase fail"));
+        }
+      }
+      done(err);
+    });
+  });
+  it('t27-3 Infosys Switching context to EV Again', function (done) {
+    var url = basePath + '/users/switchContext?access_token=' + infyToken;
+    api.set('Accept', 'application/json')
+    .post(url)
+    .send({tenantId : "/default/infosys/ev"})
+    .end(function (err, response) {
+      var result = response.body;
+      expect(response.status).to.be.equal(500);
+      done();
+    });
+  });   
+  it('t27-4 Infosys resetting context back to Infy', function (done) {
+    var url = basePath + '/users/resetContext?access_token=' + infyToken;
+    api.set('Accept', 'application/json')
+    .post(url)
+    .send()
+    .end(function (err, response) {
+      var result = response.body;
+      //console.log(result);
+      expect(result).to.be.defined;
+      expect(result.tenantId).to.be.equal("/default/infosys");
+      done();
+    });
+  });  
+  it('t27-5 Infosys accessing EV Data after switch context', function (done) {
+    var url = basePath + '/customers?access_token=' + infyToken;
+    api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, response) {
+      var result = response.body;
+      expect(result.length).to.be.equal(1);
+      expect(result[0].name).to.be.equal("Infosys Customer");
+      done(err);
+    });
+  });   
+  it('t27-6 Calling aboutMe api', function (done) {
+    var url = basePath + '/users/aboutMe?access_token=' + infyToken;
+    api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, response) {
+      var result = response.body;
+      expect(result.username).to.be.equal("infyuser");
+      expect(result.tenantId).to.be.equal("/default/infosys");
+      expect(result.email).to.be.equal("infyuser@infyuser.com");
+     
+      done(err);
+    });
+  })
+  it('t27-7 Calling context with wrong token', function (done) {
+    var url = basePath + '/users/switchContext?access_token=1231321';
+    api.set('Accept', 'application/json')
+    .post(url)
+    .send({tenantId : "/default/infosys/ev"})
+    .end(function (err, response) {
+      var result = response.body;
+      console.log(result);
+      //expect(result).to.be.defined;
+      //expect(result.tenantId).to.be.equal("/default/infosys/ev");
+      done();
+    });
+  });     
 });
 

@@ -239,8 +239,8 @@ function createQuery(ctx, context, key) {
   // const upward = ctx.Model.definition.settings.upward || ctx.options.upward || false;
   // let depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
 
-  var depth = ctx.options.depth || 0;
-  var upward = ctx.Model.definition.settings.upward || ctx.options.upward || false;
+  var depth = ctx.options.depth || ctx.Model.definition.settings.depth || 0;
+  var upward = ctx.options.upward || ctx.Model.definition.settings.upward || false;
   if (global && global.PersonalizableModels && global.PersonalizableModels[ctx.Model.modelName]) {
     upward = true;
     depth = '*';
