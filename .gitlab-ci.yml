@@ -34,7 +34,7 @@ npminstall:
     paths:
       - node_modules/
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_EE
 
 
 mongotest:
@@ -55,7 +55,7 @@ mongotest:
       - coverage/
     when: on_failure
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_EE
 
 postgrestest:
   stage: pre-build-test
@@ -70,9 +70,8 @@ postgrestest:
     - export ENABLE_DS_AUTOUPDATE=true 
     - npm run grunt-cover
   tags:
-    - CEP_RUNNER    
-  tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_EE    
+
     
 oracletest:
   stage: pre-build-test
@@ -98,12 +97,12 @@ oracletest:
     - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
     - npm run grunt-cover
   tags:
-    - CEP_RUNNER    
+    - CEP_RUNNER_EE    
 
 lastcleanup:
   stage: cleanup
   script:
     - echo "Finishing CI CD"
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_EE
 
