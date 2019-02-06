@@ -14,6 +14,9 @@
   * [setBaseEntityAutoscope(autoscopeFields)](#setbaseentityautoscope-autoscopefields-)
   * [isDefaultContext(ctx)](#isdefaultcontext-ctx-)
   * [getDefaultContext(autoscope)](#getdefaultcontext-autoscope-)
+- [REST API Documentation](#rest-api-documentation)
+  * [switch-context](#switch-context)
+  * [Rest-context](#rest-context)
 - [Tutorial](#tutorial)
   * [Basic Use](#basic-use)
 
@@ -214,6 +217,37 @@ var test = util.getDefaultContext(["tenantId", "regionId"]); // returns { tenant
 util.isDefaultContext(test); // returns true
 ```
 
+
+# REST API Documentation
+
+oe-multi-tenancy module exposes following API as REST end point. Mainly these end points enable user to change context and reset the context.
+
+## switch-context
+
+This end point allows users to swtich the context. By calling this API, user can switch the context of the user. By Default this is disabled. You can enabled this by setting **EnableSwitchContext** to true. This is very serious setting. By enabling this, potential user can switch context and impersonate other user. This setting usually should be given to super admin users.
+
+Even after EnableSwitchContext set to true, you have to give appropriate permission **programatically** to the roles for which you want to enable this. Below is sample code using which you can enable end user to make call to this API.
+
+```javascript
+var userModel = loopback.getModelByType("User");
+userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', principalId: '$authenticated', principalType: 'ROLE', property: 'switchContext' });
+```
+Below is sample API to really switch context.
+
+```
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{ \ 
+ "tenantId" :"/default/infosys/ev" \ 
+ }' 'http://localhost:3000/api/Users/switchContext?access_token=L7juGwSGYyjXKekIUJJfr56OyAjyeT0TGQzdIZhk71UCFwyPpbFN72s7WEzGXvO2'
+```
+
+## Rest-context
+
+This end point allows user to switch context back to original. This also has to be enabled **programatically**.
+```javascript
+var userModel = loopback.getModelByType("User");
+userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', principalId: '$authenticated', principalType: 'ROLE', property: 'switchContext' });
+userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', principalId: '$authenticated', principalType: 'ROLE', property: 'resetContext' });
+```
 
 
 # Tutorial
