@@ -494,14 +494,15 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       done(err);
     });
   });
-  it('t27-3 Infosys Switching context to EV Again', function (done) {
+  it('t27-3 Infosys Switching context to BPO', function (done) {
     var url = basePath + '/users/switchContext?access_token=' + infyToken;
     api.set('Accept', 'application/json')
     .post(url)
-    .send({tenantId : "/default/infosys/ev"})
+    .send({tenantId : "/default/infosys/bpo"})
     .end(function (err, response) {
       var result = response.body;
-      expect(response.status).to.be.equal(500);
+      expect(result).to.be.defined;
+      expect(result.tenantId).to.be.equal("/default/infosys/bpo");
       done();
     });
   });   
@@ -518,7 +519,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       done();
     });
   });  
-  it('t27-5 Infosys accessing EV Data after switch context', function (done) {
+  it('t27-5 Infosys accessing Infosys Data after reset context', function (done) {
     var url = basePath + '/customers?access_token=' + infyToken;
     api.set('Accept', 'application/json')
     .get(url)
@@ -536,7 +537,7 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     .end(function (err, response) {
       var result = response.body;
       expect(result.username).to.be.equal("infyuser");
-      expect(result.tenantId).to.be.equal("/default/infosys");
+      expect(result.ctx.tenantId).to.be.equal("/default/infosys");
       expect(result.email).to.be.equal("infyuser@infyuser.com");
      
       done(err);

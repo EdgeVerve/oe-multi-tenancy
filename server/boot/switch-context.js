@@ -6,7 +6,7 @@
  */
 
 // Author : Atul
-// This file attach SwitchContext/ResetContext and Aboutme functionality to User Model
+// This file attach SwitchContext/ResetContext functionality to User Model. (Aboutme functionality is moved to oe-cloud)
 // By default it is disabled. It can be enabled by setting EnableSwitchContext to true
 // Programmer has to explicitely set ACL for these end points.
 // When switchContext is called, it pushes original context into _original field of context and updates accessToken
@@ -14,6 +14,7 @@
 // eg. userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', principalId: '$authenticated', principalType: 'ROLE', property: 'switchContext' });
 
 const loopback = require('loopback');
+const _ = require('lodash');
 module.exports = function (app) {
   var userModel = loopback.getModelByType('User');
 
@@ -49,7 +50,7 @@ module.exports = function (app) {
     }
     var ctx = accessToken.ctx;
     if (ctx._original) {
-      ctx = ctx._original;
+      ctx = JSON.parse(JSON.stringify(ctx._original));
       accessToken.updateAttributes({ctx: ctx}, function (err, result) {
         if (err) {
           console.log(err);
@@ -92,69 +93,18 @@ module.exports = function (app) {
     if (!accessToken || !accessToken.ctx) {
       return cb(null, {});
     }
+    if (!accessToken.ctx._original) {newContext._original = JSON.parse(JSON.stringify(accessToken.ctx));} else {newContext._original = JSON.parse(JSON.stringify(accessToken.ctx._original));}
 
-    if (accessToken.ctx._original) {
-      return cb(new Error('Cannot switch context multiple times. Use ResetContext before switch again.'));
+    if (_.isEqual(accessToken.ctx, newContext)) {
+      return cb(null, newContext);
     }
-    var ctx = newContext;
-    ctx._original = JSON.parse(JSON.stringify(accessToken.ctx));
 
-    accessToken.updateAttributes({ctx: ctx}, function (err, result) {
+    accessToken.updateAttributes({ctx: newContext}, function (err, result) {
       if (err) {
         console.log(err);
-        return cb(new Error('Switch operation failed'));
+        return cb(new Error('Switch Context operation failed'));
       }
       return cb(null, newContext);
     });
   };
-
-  userModel.aboutMe = function (options, cb) {
-    if (!options || !options.accessToken) {
-      return cb(null, {});
-    }
-    var accessToken = options.accessToken;
-    if (!accessToken) {
-      return cb(null, {});
-    }
-    var ctx = accessToken.ctx || {};
-    var me = ctx;
-    me.username = accessToken.username;
-    me.email = accessToken.email;
-    var userId = accessToken.userId;
-    if (userId && !me.username) {
-      userModel.find({where: {id: userId}}, options, function (err, result) {
-        if (err) {
-          return cb(err);
-        }
-        if (!result) {
-          return cb({});
-        }
-        me.username = result[0].username;
-        me.email = result[0].email;
-        return cb(null, me);
-      });
-    } else {
-      return cb(null, me);
-    }
-  };
-
-  userModel.remoteMethod(
-    'aboutMe', {
-      description: 'Get Logged in user Information',
-      http: {
-        path: '/aboutMe',
-        verb: 'get'
-      },
-      accepts: [
-        {
-          arg: 'options', type: 'object', http: 'optionsFromRequest'
-        }
-      ],
-      returns: {
-        arg: 'me',
-        type: 'object',
-        root: true
-      }
-    }
-  );
 };
