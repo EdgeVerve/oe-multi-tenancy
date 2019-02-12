@@ -10,27 +10,6 @@ module.exports = function GruntConfig(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
-    mkdir: {
-      all: {
-        options: {
-          create: ['dist']
-        }
-      }
-    },
-
-    copy: {
-      main: {
-        files: [
-          // includes files within path and its sub-directories
-          {
-            expand: true,
-            src: ['**', '!node_modules/**', '!coverage/**'],
-            dest: 'dist/'
-          }
-        ]
-      }
-    },
-
     mochaTest: {
       test: {
         options: {
@@ -52,6 +31,9 @@ module.exports = function GruntConfig(grunt) {
     },
 
     mocha_istanbul: {
+      options: {
+        mochaOptions: ['--exit']
+      },        
       coverage: {
         src: 'test/test.js',
         options: {
