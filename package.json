@@ -37,8 +37,8 @@
     "mocha": "5.2.0",
     "superagent-defaults": "0.1.14",
     "supertest": "3.4.2",
+    "loopback-connector-mongodb": "3.9.2",
     "oe-cloud": "git+http://evgit/oec-next/oe-cloud.git#master",
-    "loopback-connector-mongodb": "^3.4.2",
     "oe-connector-postgresql": "git+http://evgit/oec-next/oe-connector-postgresql.git#master"
   },
   "repository": {
