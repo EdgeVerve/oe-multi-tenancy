@@ -68,7 +68,7 @@ To use oe-multi-tenancy in your project, you must include this package into your
 
 
 ```javascript
-"oe-multi-tenancy": "git+http://evgit/oecloud.io/oe-multi-tenancy.git#master"
+"oe-multi-tenancy": "git+http://evgit/oecloud.io/oe-multi-tenancy.git#2.0.0"
 ```
 
 You can also install this mixin on command line using npm install.
