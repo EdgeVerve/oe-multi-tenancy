@@ -21,14 +21,14 @@
   * [Basic Use](#basic-use)
 
 # Introduction
-This node module is responsible for data separation in multi-tenant environment. This version of oeCloud (v 2.x) clearly differentiates Data Seperation from Personalization.  
+This node module is responsible for data separation in multi-tenant environment. This version of oeCloud (v 2.x) clearly differentiates Data Seperation from Personalization.
 Multi tenancy is more about data separation. Multi tenancy is typically important when application is hosted on cloud where more than one customer(tenant) shares same infrastructure.
  Using this module, in multi tenant environment developer can control how data can be seperated. In very simple language, one tenant cannot see or modify other tenant's data.
 
 ## TenantID is not special
 
-In previous version of oeCloud (1.x), tenantId was **hard coded** in many places and multi tenancy thus was enforced with only tenantId parameter. Code would break if tenantId was not provided and also would break if more then such parameter (also called autoScope) were provided. 
-In oeCloud 2.x, care has been taken to ensure that tenantId is not **first class citizen** - meaning, no code is written to assume that application is multi tenant and tenantId is always provided. 
+In previous version of oeCloud (1.x), tenantId was **hard coded** in many places and multi tenancy thus was enforced with only tenantId parameter. Code would break if tenantId was not provided and also would break if more then such parameter (also called autoScope) were provided.
+In oeCloud 2.x, care has been taken to ensure that tenantId is not **first class citizen** - meaning, no code is written to assume that application is multi tenant and tenantId is always provided.
 
 ## Difference between oeCloud 1.x and 2.x
 
@@ -53,7 +53,7 @@ In this section, we will see how we can use install this module in our project. 
 ## Testing and Code coverage
 
 ```sh
-$ git clone http://evgit/oec-next/oe-multi-tenancy.git
+$ git clone http://evgit/oecloud.io/oe-multi-tenancy.git
 $ cd oe-multi-tenancy
 $ npm install --no-optional
 $ npm run grunt-cover
@@ -68,10 +68,10 @@ To use oe-multi-tenancy in your project, you must include this package into your
 
 
 ```javascript
-"oe-multi-tenancy": "git+http://evgit/oec-next/oe-multi-tenancy.git#master"
+"oe-multi-tenancy": "git+http://evgit/oecloud.io/oe-multi-tenancy.git#master"
 ```
 
-You can also install this mixin on command line using npm install. 
+You can also install this mixin on command line using npm install.
 
 
 ```sh
@@ -95,7 +95,7 @@ app-list.json
 
 ### Enabling or Disabling
 
-There is some control given to enable or disable this functionality. 
+There is some control given to enable or disable this functionality.
 This module when loaded, it will attach functionality (mixin) on BaseEntity model. Therefore, by default, all models derived from BaseEntity will be affected when you include this module.
 If you want to make this module work with specific Models, you need to change the way it is loaded. For that use following entry in your app-list.json
 
@@ -154,7 +154,7 @@ Consider following table - this shows which record will be retrieved. IT is assu
 
 | request Scope tenantID | request scope regionID | records | Reason |
 | ---------------------- | ---------------------- | ------- | ------ |
-| /default | /default | 1 | default scope record will be returned | 
+| /default | /default | 1 | default scope record will be returned |
 | /default/citi | /default | 1 | No /default/citi available so default scoped record returned |
 | /default | default/asia | 6 | exact match found |
 | /default | default/asia | 6 | exact match found |
@@ -190,7 +190,7 @@ Remember, this is based on Model and thus you can have only selected models with
 
 ## isDefaultContext(ctx)
 
-This is utility function which will check if given context is default context. If returns true or false based on if given ctx is of default context or not. 
+This is utility function which will check if given context is default context. If returns true or false based on if given ctx is of default context or not.
 
 | Parameter | true or false |
 | --------- | ------------- |
@@ -235,8 +235,8 @@ userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', princ
 Below is sample API to really switch context.
 
 ```
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{ \ 
- "tenantId" :"/default/infosys/ev" \ 
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{ \
+ "tenantId" :"/default/infosys/ev" \
  }' 'http://localhost:3000/api/Users/switchContext?access_token=L7juGwSGYyjXKekIUJJfr56OyAjyeT0TGQzdIZhk71UCFwyPpbFN72s7WEzGXvO2'
 ```
 
@@ -257,7 +257,7 @@ Application developer needs to configure parameter on which he/she wants to sepa
 
 ## Basic Use
 
-Consider following Customer model. 
+Consider following Customer model.
 
 ```javascript
 {
@@ -273,14 +273,14 @@ Consider following Customer model.
       "type": "number"
     }
   },
-  "mixins" : { 
+  "mixins" : {
   "MultiTenancyMixin" : true,
   },
   "validations": [],
   "relations": {},
   "acls": [],
   "methods": {},
-  
+
 "autoscope" : ["tenantId"]
 }
 
@@ -290,7 +290,7 @@ You are seeing two important entries in above model's definition. You can see th
 
 With above settings, whenever there is query on Customer model in application (either via JavaScript code or by http method), mixin will add **where** clause with tenantId.
 
-**tenantId** must be part of context. Context is usually generated based on request which is not part of this module. 
+**tenantId** must be part of context. Context is usually generated based on request which is not part of this module.
 
 For example, application may stores tenantId and userId mapping in database and when user logs in, application will make that as part of access token.
 
@@ -313,7 +313,7 @@ For example, application may stores tenantId and userId mapping in database and 
   });
 ```
 
-As shown in above code snippet, you can see that whenever access token is being created, this code populates tenantId as part of Access Token. 
+As shown in above code snippet, you can see that whenever access token is being created, this code populates tenantId as part of Access Token.
 This way, for all requests with the this access token, tenantId will be available as part of context.
 You can thus create and designate any field which can be **autoScoped** and always made available as part of context.
 
