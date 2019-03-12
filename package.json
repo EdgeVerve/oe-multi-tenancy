@@ -45,6 +45,6 @@
     "type": "git",
     "url": "https://github.com/EdgeVerve/oe-multi-tenancy.git"
   },
-  "author" : "Atul Pandit <atul_pandit@infosys.com>",
+  "author": "Atul Pandit <atul_pandit@infosys.com>",
   "license": "MIT"
 }

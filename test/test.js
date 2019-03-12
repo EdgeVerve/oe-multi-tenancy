@@ -21,8 +21,8 @@ oecloud.boot(__dirname, function (err) {
     process.exit(1);
   }
   var m = loopback.findModel("Model");
-  m.setOptions = function(){
-    return { ctx : { tenantId : '/anonymous'}};
+  m.setOptions = function(ctx, options){
+    return options;
   }  
   var accessToken = loopback.findModel('AccessToken');
   accessToken.observe("before save", function (ctx, next) {
