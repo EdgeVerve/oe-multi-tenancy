@@ -63,7 +63,7 @@ mongotest:
     - npm config set registry http://10.188.25.62:9002/
     - time npm install --no-optional
     - npm run grunt-cover
-     - mkdir -p ./artifacts/${CI_PROJECT_NAME}/
+    - mkdir -p ./artifacts/${CI_PROJECT_NAME}/
     - cp -r coverage ./artifacts/${CI_PROJECT_NAME}/
   artifacts:
     untracked: true
