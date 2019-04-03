@@ -7,7 +7,7 @@
 
 // Author : Atul
 const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
-const toRegExp = require('loopback-datasource-juggler/lib/utils').toRegExp;
+// const toRegExp = require('loopback-datasource-juggler/lib/utils').toRegExp;
 const _ = require('lodash');
 const log = require('oe-logger')('multi-tenancy-mixin');
 const utils = require('../../lib/utils.js');
@@ -183,14 +183,16 @@ function afterAccess(ctx, next) {
   }
 
   var upward = modelSettings.upward || ctx.options.upward || false;
+  var downward = ctx.options.downward || ctx.Model.definition.settings.downward || false;
   if (global && global.PersonalizableModels && global.PersonalizableModels[ctx.Model.modelName]) {
     upward = true;
+    downward = false;
   }
 
   let resultData = [];
   const result = ctx.accdata;
 
-  if (result.length && upward) {
+  if (result.length && upward && !downward) {
     let uniq = [];
     const modelProp = ctx.Model.definition.properties;
 
@@ -241,8 +243,10 @@ function createQuery(ctx, context, key) {
 
   var depth = ctx.options.depth || ctx.Model.definition.settings.depth || 0;
   var upward = ctx.options.upward || ctx.Model.definition.settings.upward || false;
+  var downward = ctx.options.downward || ctx.Model.definition.settings.downward || false;
   if (global && global.PersonalizableModels && global.PersonalizableModels[ctx.Model.modelName]) {
     upward = true;
+    downward = false;
     depth = '*';
   }
 
@@ -250,17 +254,24 @@ function createQuery(ctx, context, key) {
   // const key = hierarchy; //`_hierarchyScope.${hierarchy}`;
   const regexString = context[key];
   key = '_autoScope.' + key;
-  const orParms = [];
+  var orParms1 = [];
+  var orParms2 = [];
   let modifiedRegex;
 
-  if (!upward) {
+  // go downwards
+  if (downward || (!downward && !upward && depth === 0) ) {
+    orParms1 = [];
+    query = {};
     if (depth === '*') {
-      const regexObj = toRegExp(regexString);
-
+      // const regexObj = toRegExp(RegExp("^" + regexString + `[0-9a-zA-Z\_\-${separator}]*`));
+      // const r = `^${regexString}[0-9a-zA-Z\_\-${separator}]*`;
+      const r = `^${regexString}.*`;
+      const regexObj = new RegExp(r);
       query[key] = regexObj;
-      mergeQuery(ctx.query, {
-        where: query
-      });
+      orParms1.push(query);
+      // mergeQuery(ctx.query, {
+      //   where: query
+      // });
     } else {
       for (let i = 0; i <= depth; i++) {
         query = {};
@@ -271,15 +282,18 @@ function createQuery(ctx, context, key) {
           modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}${separator}[0-9a-zA-Z\'_\-]*$`;
         }
         query[key] = new RegExp(modifiedRegex);
-        orParms.push(query);
+        orParms1.push(query);
       }
-      mergeQuery(ctx.query, {
-        where: {
-          or: orParms
-        }
-      });
+      // mergeQuery(ctx.query, {
+      //   where: {
+      //     or: orParms
+      //   }
+      // });
     }
-  } else {
+  }
+  if (upward) {
+    query = {};
+    orParms2 = [];
     if (depth === '*') {
       depth = regexString.split(separator).length - 2;
     }
@@ -296,15 +310,21 @@ function createQuery(ctx, context, key) {
         break;
       }
       query[key] = new RegExp('^' + modifiedRegex + '$');
-      orParms.push(query);
+      orParms2.push(query);
     }
-    mergeQuery(ctx.query, {
-      where: {
-        or: orParms
-      }
-    });
-    log.debug(ctx.options, 'Final formed query', ctx.query);
+    // mergeQuery(ctx.query, {
+    //   where: {
+    //     or: orParms
+    //   }
+    // });
   }
+  var orParms = orParms1.concat(orParms2);
+  mergeQuery(ctx.query, {
+    where: {
+      or: orParms
+    }
+  });
+  log.debug(ctx.options, 'Final formed query', ctx.query);
 }
 
 function beforeAccess(ctx, next) {
