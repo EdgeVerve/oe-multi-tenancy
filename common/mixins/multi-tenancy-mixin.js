@@ -258,6 +258,10 @@ function createQuery(ctx, context, key) {
   var orParms2 = [];
   let modifiedRegex;
 
+  if (!downward && !upward && depth !== 0) {
+    depth = 0;
+  }
+
   // go downwards
   if (downward || (!downward && !upward && depth === 0) ) {
     orParms1 = [];
