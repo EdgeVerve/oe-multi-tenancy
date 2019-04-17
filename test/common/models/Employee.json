@@ -1,0 +1,25 @@
+{
+  "name": "Employee",
+  "base": "BaseEntity",
+  "idInjection": true,
+  "options" : {
+    "downward" : true,
+    "upward" : true,
+    "depth" : "*"
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "unique" : true
+    },
+    "age": {
+      "type": "number"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {},
+  "autoscope" : ["tenantId"]
+}
+
