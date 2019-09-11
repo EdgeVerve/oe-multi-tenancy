@@ -27,7 +27,7 @@ npminstall:
     - status_eslint=0
     - exit_status=0
     - npm set progress=false
-    - npm config set registry http://10.188.25.62:9002/
+    - npm config set registry ${NPM_REGISTRY}
     - time npm install eslint babel-eslint --no-optional
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
@@ -42,7 +42,6 @@ npminstall:
     - if [ $status_vulnerabilities == 1 ]; then echo "Dependency vulnerabilities exist"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
   artifacts:
-    untracked: true
     expire_in: 2h
     paths:
       - node_modules/
@@ -58,14 +57,13 @@ mongotest:
     - export NODE_ENV=mongo
     - export MONGO_HOST="10.73.53.144"
     - export DB=mongo
-    - export DB_NAME=${CI_PIPELINE_ID}_mongo
-    - npm config set registry http://10.188.25.62:9002/
+    - export DB_NAME=${CI_JOB_ID}_mongo
+    - npm config set registry ${NPM_REGISTRY}
     - time npm install --no-optional
     - npm run grunt-cover
     - mkdir -p ./artifacts/${CI_PROJECT_NAME}/
     - cp -r coverage ./artifacts/${CI_PROJECT_NAME}/
   artifacts:
-    untracked: true
     expire_in: 2h
     paths:
       - coverage/
@@ -80,8 +78,8 @@ postgrestest:
     - export NODE_ENV=postgres
     - export DB=postgres
     - export POSTGRES_HOST="10.73.53.144"
-    - export DB_NAME=${CI_PIPELINE_ID}_pg
-    - npm config set registry http://10.188.25.62:9002/
+    - export DB_NAME=${CI_JOB_ID}_pg
+    - npm config set registry ${NPM_REGISTRY}
     - time npm install --no-optional
     - export ENABLE_DS_AUTOUPDATE=true 
     - npm run grunt-cover
@@ -100,8 +98,8 @@ oracletest:
     - export ORACLE_SYSUSER=oeadmin
     - export ORACLE_SYSPASSWORD=oeadmin
     - export ORACLE_SID=ORCLCDB
-    - export DB_NAME=${CI_PIPELINE_ID}_pg
-    - npm config set registry http://10.188.25.62:9002/
+    - export DB_NAME=${CI_JOB_ID}_pg
+    - npm config set registry ${NPM_REGISTRY}
     - time npm install git+http://evgit/oecloud.io/oe-connector-oracle.git --no-optional
     - time npm install --no-optional
     - mv /oracledb node_modules/
@@ -138,7 +136,7 @@ performancejob:
     PERF_LOOPCOUNT: "50000"
   script:
     - npm set progress=false
-    - npm config set registry http://10.188.25.62:9002/
+    - npm config set registry ${NPM_REGISTRY}
     #- npm config set registry https://registry.npmjs.org/
     - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
     - time npm install --no-optional
