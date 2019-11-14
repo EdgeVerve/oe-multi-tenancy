@@ -7,27 +7,31 @@
 
 // Author : Atul
 var oecloud = require('oe-cloud');
-var loopback=require('loopback');
+var loopback = require('loopback');
 oecloud.observe('loaded', function (ctx, next) {
   oecloud.attachMixinsToBaseEntity("MultiTenancyMixin");
   return next();
-})
+});
 oecloud.addContextField('tenantId', {
+  type: "string"
+});
+oecloud.addContextField('regionId', {
   type: "string"
 });
 
 
-
 oecloud.boot(__dirname, function (err) {
   var m = loopback.findModel("Model");
-  m.setOptions = function(){
-    return { ctx : { tenantId : '/anonymous'}};
-  }  
+  m.setOptions = function (ctx, options) {
+    options.ctx.regionId = '/default/asia/india';
+    return options;
+  }
   var accessToken = loopback.findModel('AccessToken');
   accessToken.observe("before save", function (ctx, next) {
     var userModel = loopback.findModel("User");
     var instance = ctx.instance;
-    userModel.find({ where: {id: instance.userId} }, {}, function (err, result) {
+    instance.ctx = instance.ctx || {};
+    userModel.find({ where: { id: instance.userId } }, {}, function (err, result) {
       if (err) {
         return next(err);
       }
@@ -36,20 +40,20 @@ oecloud.boot(__dirname, function (err) {
       }
       var user = result[0];
       if (user.username === "admin") {
-        instance.tenantId = '/default';
+        instance.ctx.tenantId = '/default';
       }
       else if (user.username === "evuser") {
-        instance.tenantId = '/default/infosys/ev';
+        instance.ctx.tenantId = '/default/infosys/ev';
       }
       else if (user.username === "infyuser") {
-        instance.tenantId = '/default/infosys';
+        instance.ctx.tenantId = '/default/infosys';
       }
       else if (user.username === "bpouser") {
-        instance.tenantId = '/default/infosys/bpo';
+        instance.ctx.tenantId = '/default/infosys/bpo';
       }
       return next(err);
     });
-  });  
+  });
   oecloud.start();
   oecloud.emit('test-start');
 });

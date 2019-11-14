@@ -21,8 +21,8 @@ oecloud.boot(__dirname, function (err) {
     process.exit(1);
   }
   var m = loopback.findModel("Model");
-  m.setOptions = function(){
-    return { ctx : { tenantId : '/anonymous'}};
+  m.setOptions = function(ctx, options){
+    return options;
   }  
   var accessToken = loopback.findModel('AccessToken');
   accessToken.observe("before save", function (ctx, next) {
@@ -75,14 +75,14 @@ var supertest = require('supertest');
 var Customer;
 var api = defaults(supertest(app));
 var basePath = app.get('restApiRoot');
-var url = basePath + '/Customers';
-
+var Employee;
 
 describe(chalk.blue('Multi tenancy Test Started'), function (done) {
   this.timeout(10000);
   before('wait for boot scripts to complete', function (done) {
     app.on('test-start', function () {
       Customer = loopback.findModel("Customer");
+      Employee = loopback.findModel("Employee");
       var userModel = loopback.findModel("User");
       userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', principalId: '$authenticated', principalType: 'ROLE', property: 'switchContext' });
       userModel.settings.acls.push({ accessType: 'EXECUTE', permission: 'ALLOW', principalId: '$authenticated', principalType: 'ROLE', property: 'resetContext' });
@@ -273,36 +273,36 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
     });
   });
 
-  it('t15 getting record for /default scope with depth=1', function (done) {
-    Customer.find({}, { ctx: { tenantId: "/default" }, depth: 1 }, function (err, results) {
+  it('t15 getting record for /default scope with depth=1, downward=true', function (done) {
+    Customer.find({}, { ctx: { tenantId: "/default" }, depth: 1, downward : true }, function (err, results) {
       expect(results.length).to.equal(3);
       return done(err);
     });
   });
 
   it('t16 getting record for /default scope with depth=2', function (done) {
-    Customer.find({}, { ctx: { tenantId: "/default" }, depth: 2 }, function (err, results) {
+    Customer.find({}, { ctx: { tenantId: "/default" }, depth: 2, downward : true }, function (err, results) {
       expect(results.length).to.equal(6);
       return done(err);
     });
   });
 
   it('t17 getting record for /default/infosys scope with depth=1', function (done) {
-    Customer.find({}, { ctx: { tenantId: "/default/infosys" }, depth: 1 }, function (err, results) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys" }, depth: 1, downward : true }, function (err, results) {
       expect(results.length).to.equal(4);
       return done(err);
     });
   });
 
   it('t18 getting record for /default/infosys scope with depth=2', function (done) {
-    Customer.find({}, { ctx: { tenantId: "/default/infosys" }, depth: 2 }, function (err, results) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys" }, depth: 2, downward : true }, function (err, results) {
       expect(results.length).to.equal(4);
       return done(err);
     });
   });
 
   it('t19 getting record for /default/infosys/ev scope with depth=2', function (done) {
-    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2 }, function (err, results) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, downward : true }, function (err, results) {
       expect(results.length).to.equal(1);
       return done(err);
     });
@@ -311,6 +311,19 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
   it('t20 getting record for /default/infosys/ev scope with depth=2 - with upward direction. no bpo customers should come', function (done) {
     Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true }, function (err, results) {
       expect(results.length).to.equal(4);
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].name.toLowerCase().indexOf("bpo") >= 0) {
+          return done(new Error("BPO Customer should not be retrieved."))
+        }
+      }
+      return done(err);
+    });
+  });
+
+  
+  it('t20.1 getting record for /default/infosys/ev scope with depth=2 - with upward and downward direction. All customers should be retrieved', function (done) {
+    Customer.find({}, { ctx: { tenantId: "/default/infosys/ev" }, depth: 2, upward: true , downward : true}, function (err, results) {
+      //expect(results.length).to.equal(4);
       for (var i = 0; i < results.length; ++i) {
         if (results[i].name.toLowerCase().indexOf("bpo") >= 0) {
           return done(new Error("BPO Customer should not be retrieved."))
@@ -555,6 +568,75 @@ describe(chalk.blue('Multi tenancy Test Started'), function (done) {
       //expect(result.tenantId).to.be.equal("/default/infosys/ev");
       done();
     });
-  });     
+  });
+
+  it('t28.1 creating record for default tenant in Employee Model', function (done) {
+    Employee.create({ name: "Default Employee", age: 50 }, { ctx: { tenantId: '/default' } }, function (err, results) {
+      expect(err).to.be.null;
+      return done();
+    });
+  });
+
+  it('t28.2 creating record for infosys tenant in Employee Model', function (done) {
+    Employee.create({ name: "Infosys Employee", age: 50 }, { ctx: { tenantId: '/default/infosys' } }, function (err, results) {
+      expect(err).to.be.null;
+      return done();
+    });
+  });
+
+  it('t28-3 Creating record for ev tenant in Employee table (http)', function (done) {
+    var url = basePath + '/employees?access_token=' + evToken;
+    api.set('Accept', 'application/json')
+    .post(url)
+    .send({name : "EV Employee", age : 20})
+    .end(function (err, response) {
+      var result = response.body;
+      done();
+    });
+  });
+
+  it('t28-4 Creating record for bpo tenant in Employee table (http)', function (done) {
+    var url = basePath + '/employees?access_token=' + bpoToken;
+    api.set('Accept', 'application/json')
+    .post(url)
+    .send({name : "BPO Employee", age : 20})
+    .end(function (err, response) {
+      var result = response.body;
+      done();
+    });
+  });
+
+  it('t28-5 GET Employee for bpo tenant - should return bpo, infy and default tenant records', function (done) {
+    var url = basePath + '/employees?access_token=' + bpoToken;
+    api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, response) {
+      var result = response.body;
+      expect(result.length).to.be.equal(3)
+      done(err);
+    });
+  })
+
+  it('t28-6 GET Employee for ev tenant - should return ev, infy and default tenant records', function (done) {
+    var url = basePath + '/employees?access_token=' + evToken;
+    api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, response) {
+      var result = response.body;
+      expect(result.length).to.be.equal(3)
+      done(err);
+    });
+  })
+  it('t28-7 GET Employee for infosys tenant - should return ev, infy, bpo and default tenant records', function (done) {
+    var url = basePath + '/employees?access_token=' + infyToken;
+    api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, response) {
+      var result = response.body;
+      expect(result.length).to.be.equal(4)
+      done(err);
+    });
+  })
+
 });
 

@@ -1,3 +1,3 @@
-use oe-multi-tenancy;
+use oe-multi-tenancy-test;
 db.dropDatabase();
 
