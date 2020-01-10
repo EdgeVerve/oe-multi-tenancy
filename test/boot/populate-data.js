@@ -2,7 +2,7 @@ var loopback = require('loopback');
 
 module.exports = function (app, done) {
   var Customer = loopback.findModel('Customer');
-  Customer.destroyAll({}, { ignoreAutoScope : true }, function (err) {
+  Customer.destroyAll({}, { ignoreAutoScope: true }, function (err) {
     console.log(err);
     var item1 = {
       'name': 'Customer A',
@@ -24,15 +24,15 @@ module.exports = function (app, done) {
       'name': 'BPO Customer A',
       'age': 30
     };
-    Customer.create(item1, { ctx: { tenantId: "/default" } }, function (err, r) {
-      Customer.create(item2, { ctx: { tenantId: "/default/infosys" } }, function (err, r) {
-        Customer.create(item3, { ctx: { tenantId: "/default/infosys/ev" } }, function (err, r) {
-          Customer.create([item4, item5], { ctx: { tenantId: "/default/infosys/bpo" } }, function (err, r) {
+    Customer.create(item1, { ctx: { tenantId: '/default' } }, function (err, r) {
+      Customer.create(item2, { ctx: { tenantId: '/default/infosys' } }, function (err, r) {
+        Customer.create(item3, { ctx: { tenantId: '/default/infosys/ev' } }, function (err, r) {
+          Customer.create([item4, item5], { ctx: { tenantId: '/default/infosys/bpo' } }, function (err, r) {
             return done();
           });
         });
       });
     });
   });
-}
+};
 
