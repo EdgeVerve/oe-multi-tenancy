@@ -5,7 +5,6 @@
  *
  */
 
-const _ = require('lodash');
 const loopback = require('loopback');
 const rootModel = loopback.findModel('Model');
 module.exports = function (option) {
@@ -23,7 +22,7 @@ module.exports = function (option) {
         }
       });
     }
-    if (_.isEmpty(req.callContext) && rootModel && rootModel.setCallContext) {
+    if (rootModel && rootModel.setCallContext) {
       req.callContext = rootModel.setCallContext(req);
     }
     return next();
