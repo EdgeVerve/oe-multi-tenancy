@@ -10,17 +10,6 @@ module.exports = function GruntConfig(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
-    mochaTest: {
-      test: {
-        options: {
-          quiet: false,
-          clearRequireCache: true,
-          timeout: 100000
-        },
-        src: ['test/test.js']
-      }
-    },
-
     clean: {
       coverage: {
         src: ['coverage/']
@@ -51,12 +40,8 @@ module.exports = function GruntConfig(grunt) {
   });
 
   // Add the grunt-mocha-test tasks.
-  grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-mocha-istanbul');
   grunt.loadNpmTasks('grunt-contrib-clean');
-
-  grunt.loadNpmTasks('grunt-mkdir');
-  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-mocha-istanbul');
 
   grunt.registerTask('test-with-coverage', ['clean:coverage', 'mocha_istanbul']);
 };
